@@ -1,19 +1,19 @@
 diff --git a/addons/base_vat/base_vat.py b/addons/base_vat/base_vat.py
-index 38ad7a8..e29a419 100644
+index 38ad7a8..4e0baa4 100644
 --- a/addons/base_vat/base_vat.py
 +++ b/addons/base_vat/base_vat.py
 @@ -79,6 +79,10 @@ class res_partner(osv.osv):
          vat_country, vat_number = vat[:2].lower(), vat[2:].replace(' ', '')
          return vat_country, vat_number
  
-+    def _get_checksum(weights, digits):
++    def _get_checksum(self, weights, digits):
 +        checksum = sum([weight * digit for weight, digit in zip(weights, digits)])
 +        return checksum % 11
 +
      def simple_vat_check(self, cr, uid, country_code, vat_number, context=None):
          '''
          Check the VAT number depending of the country.
-@@ -263,19 +267,28 @@ class res_partner(osv.osv):
+@@ -263,19 +267,29 @@ class res_partner(osv.osv):
              int(vat)
          except ValueError:
              return False
@@ -40,7 +40,8 @@ index 38ad7a8..e29a419 100644
 -        if check == 11:
 -            check = 0
 -        if check == 10:
-+        checksum = 11 - _get_checksum([3, 2, 7, 6, 5, 4, 3, 2], vat)
++        digits = map(int, vat)
++        checksum = 11 - self._get_checksum([3, 2, 7, 6, 5, 4, 3, 2], digits)
 +        if checksum == 11:
 +            checksum = 0
 +        if checksum == 10:
@@ -52,7 +53,7 @@ index 38ad7a8..e29a419 100644
  
      # Peruvian VAT validation, contributed by Vauxoo
      def check_vat_pe(self, vat):
-@@ -312,4 +325,39 @@ class res_partner(osv.osv):
+@@ -312,4 +326,41 @@ class res_partner(osv.osv):
          else:
              return False
  
@@ -71,24 +72,26 @@ index 38ad7a8..e29a419 100644
 +            return False
 +
 +        if len(vat) == 10:
-+            checksum = _get_checksum([2, 4, 8, 5, 10, 9, 7, 3, 6], vat)
++            digits = map(int, vat)
++            checksum = self._get_checksum([2, 4, 8, 5, 10, 9, 7, 3, 6], digits)
 +            if checksum == 10:
-+            return vat[-1] == 0
++        	return int(vat[-1]) == 0
 +            if checksum < 10:
-+            return vat[-1] == checksum
++        	return int(vat[-1]) == checksum
 +
 +         
-+        if (len(vat) in [9, 13])):
-+            checksum = _get_checksum(range(1, 9), vat)
++        if (len(vat) in [9, 13]):
++            digits = map(int, vat)
++            checksum = self._get_checksum(range(1, 9), digits)
 +            if checksum == 10:
-+               checksum = _get_checksum(range(3, 11), vat)
-+            return vat[-1] == checksum % 10
++               checksum = self._get_checksum(range(3, 11), digits)
++            return int(vat[-1]) == checksum % 10
 +
-+        if len(eik) == 13:
-+            digits = vat[9:13]
-+            checksum = _get_checksum([2, 7, 3, 5], digits)
++        if len(vat) == 13:
++            digits = map(int, vat[9:13])
++            checksum = self._get_checksum([2, 7, 3, 5], digits)
 +            if checksum == 10:
-+                checksum = _get_checksum([4, 9, 5, 7], digits)
++                checksum = self._get_checksum([4, 9, 5, 7], digits)
 +            return digits[-1] == checksum % 10
 + 
  # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
