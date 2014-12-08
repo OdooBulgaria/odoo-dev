@@ -1,0 +1,13 @@
+diff --git a/addons/web/static/src/js/chrome.js b/addons/web/static/src/js/chrome.js
+index bbf3615..83a780e 100644
+--- a/addons/web/static/src/js/chrome.js
++++ b/addons/web/static/src/js/chrome.js
+@@ -1292,7 +1292,7 @@ instance.web.WebClient = instance.web.Client.extend({
+         }
+     },
+     update_logo: function() {
+-        var img = this.session.url('/web/binary/company_logo');
++        var img = this.session.url('/web/binary/company_logo' + '?_' + Math.random());
+         this.$('.oe_logo img').attr('src', '').attr('src', img);
+         this.$('.oe_logo_edit').toggleClass('oe_logo_edit_admin', this.session.uid === 1);
+     },
